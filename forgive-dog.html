@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>原谅我吗？</title>
+  <style>
+    :root {
+      --forgive-scale: 1;
+    }
+
+    body {
+      background: #fffbe8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Microsoft YaHei', sans-serif;
+      padding: 2rem;
+    }
+
+    .title {
+      color: #6b4f4f;
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dog-container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 2rem 0;
+    }
+
+    .dog-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: all 0.3s ease;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-forgive {
+      background: #4CAF50;
+      color: white;
+      transform: scale(var(--forgive-scale));
+    }
+
+    .btn-deny {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-home {
+      background: #FFC107;
+      color: white;
+    }
+
+    .btn-deny:disabled,
+    .btn-forgive:disabled {
+      background: #a0a0a0;
+      color: #ffffff;
+      cursor: not-allowed;
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+
+    .message {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      color: #6b4f4f;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+
+    .show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title">🐶 希望你能原谅犯错小狗~ 🐾</h1>
+  
+  <div class="dog-container">
+    <img 
+      id="dog" 
+      class="dog-image" 
+      src="https://s1.aigei.com/src/img/gif/5c/5ceea8cdd224413e88eb17df98c6bec4.gif?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:9_OlX06QvFQARtMc115IjcqPH4o=" 
+      alt="动态小狗"
+    >
+  </div>
+
+  <div class="buttons">
+    <button 
+      id="forgiveBtn"
+      class="btn btn-forgive" 
+      onmouseover="changeExpression('happy')" 
+      onmouseout="resetExpression()"
+    >
+      原谅小狗
+    </button>
+    
+    <button 
+      id="denyBtn"
+      class="btn btn-deny" 
+      onmouseover="changeExpression('sad')" 
+      onmouseout="resetExpression()"
+    >
+      拒绝原谅
+    </button>
+  </div>
+
+  <div id="message" class="message"></div>
+
+  <script>
+    // 可配置参数
+    const config = {
+      maxDeny: 5,
+      messages: {
+        forgiveSuccess: '终于等到你！小狗超开心~ 🐩✨',
+        finalDeny: '小狗做错啦... 请你再给小狗一次机会 💔',
+        denyTemplates: [
+          '小狗开始慌张...',
+          '开始小声呜咽',
+          '小狗开始啜泣',
+          '孤零零的可怜小狗~',
+          '小狗嚎啕大哭'
+        ]
+      },
+      customImages: [
+        'https://s1.aigei.com/src/img/gif/35/3538deac85a64689a5b3ce2b93ea18e6.gif?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:3aHjSUDVza1B4Zm6dA7Nst4jTC8=',
+	'https://s1.aigei.com/src/img/gif/63/6356062e23474ab58fe2112874399519.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:zxOU2lY8Tmd9wwnfxpllJG8PqXo=',
+        'https://s1.aigei.com/src/img/gif/75/75b32a6118c04233b6f41da61732046d.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:Qs8tIGX8nDAplWjfn1lTgbtBMA0=',
+        'https://s1.aigei.com/src/img/gif/24/241869d4c1cd44689a04715e3a76c420.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:hQYQaBx5SDPowTmWiYA9Gh0UxTY=',
+        'https://s1.aigei.com/src/img/gif/20/208932ba63f74fce848b8c417973b903.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:f1kHBrz01owazD3XfCPQb10ghhg='
+      ],
+      forgiveGif: 'https://s1.aigei.com/src/img/gif/9f/9f32358459284385bfe922a80ab20fc8.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:zpSQFAmh5CesjYjp1g7GxTm-nqE='
+    }
+
+    let denyCount = 0
+    const dogImage = document.getElementById('dog')
+    const messageEl = document.getElementById('message')
+    const denyBtn = document.getElementById('denyBtn')
+    const forgiveBtn = document.getElementById('forgiveBtn')
+    const buttonsContainer = document.querySelector('.buttons')
+
+    // 表情配置
+    const expressions = {
+      normal: 'https://s1.aigei.com/src/img/gif/5c/5ceea8cdd224413e88eb17df98c6bec4.gif?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:9_OlX06QvFQARtMc115IjcqPH4o=',
+      happy: 'https://s1.aigei.com/src/img/gif/9f/9f32358459284385bfe922a80ab20fc8.gif?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:zpSQFAmh5CesjYjp1g7GxTm-nqE=',
+      sad: 'https://s1.aigei.com/src/img/gif/35/3538deac85a64689a5b3ce2b93ea18e6.gif?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:3aHjSUDVza1B4Zm6dA7Nst4jTC8='
+    }
+
+    // 修改后的表情切换函数
+    function changeExpression(type) {
+      if(denyCount >= config.maxDeny || forgiveBtn.disabled) return
+      
+      if(type === 'sad') {
+        const nextImageIndex = denyCount
+        dogImage.src = config.customImages[nextImageIndex] || expressions.sad
+      } else {
+        dogImage.src = expressions[type]
+      }
+
+      dogImage.style.transform = type === 'happy' 
+        ? 'rotate(-5deg) scale(1.1)' 
+        : 'rotate(5deg) scale(0.9)'
+    }
+
+    // 修改后的重置函数
+    function resetExpression() {
+      if(forgiveBtn.disabled) return // 原谅后不再重置
+      if(denyCount === 0) {
+        dogImage.src = expressions.normal
+        dogImage.style.transform = 'none'
+      }
+    }
+
+    // 新增首页按钮创建函数
+    function createHomeButton() {
+      const homeBtn = document.createElement('button')
+      homeBtn.className = 'btn btn-home'
+      homeBtn.textContent = '回到首页'
+      homeBtn.onclick = () => location.reload()
+      buttonsContainer.appendChild(homeBtn)
+    }
+
+    forgiveBtn.onclick = function() {
+      dogImage.src = config.forgiveGif
+      forgiveBtn.disabled = true
+      denyBtn.disabled = true
+      showMessage(config.messages.forgiveSuccess, false)
+      dogImage.style.transform = 'rotate(360deg) scale(1.5)'
+      dogImage.style.transition = 'all 1s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      
+      // 添加首页按钮
+      createHomeButton()
+    }
+
+    denyBtn.onclick = () => {
+      denyCount++
+      
+      document.documentElement.style.setProperty('--forgive-scale', 1 + denyCount*0.1)
+      dogImage.src = config.customImages[denyCount-1] || expressions.sad
+      
+      const msgIndex = Math.min(denyCount-1, config.messages.denyTemplates.length-1)
+      showMessage(config.messages.denyTemplates[msgIndex])
+
+      if(denyCount >= config.maxDeny) {
+        denyBtn.disabled = true
+        denyBtn.textContent = '求求你原谅小狗吧！'
+        showMessage(config.messages.finalDeny)
+      }
+    }
+
+    function showMessage(text, autoHide = true) {
+      messageEl.textContent = text
+      messageEl.classList.add('show')
+      if(autoHide) {
+        setTimeout(() => messageEl.classList.remove('show'), 2000)
+      } else {
+        clearTimeout(messageEl.timeout)
+      }
+    }
+  </script>
+</body>
+</html>
